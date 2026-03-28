@@ -98,4 +98,24 @@ public class MySqlRepo implements Repo {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public String loadAboutContent() {
+        var sql = "SELECT my_value FROM settings WHERE my_key = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "ABOUT_CONTENT");
+            try (var rs = ps.executeQuery()) {
+                if (!rs.next()) throw new RuntimeException("About content not configured");
+                return rs.getString("my_value");
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+    @Override
+    public void saveAboutContent(String aboutContent) {
+        var sql = "UPDATE settings SET my_value = ? WHERE my_key = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, aboutContent);
+            ps.setString(2, "ABOUT_CONTENT");
+            if (ps.executeUpdate() == 0) throw new RuntimeException("Update failed");
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
 }
