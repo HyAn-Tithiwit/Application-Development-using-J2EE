@@ -50,4 +50,27 @@ public class ProductsService {
         var id = repo.insertProduct(name);
         storage.saveFile(image, "products/" + id + ".jpg");
     }
+    public String getProductName(int id) throws Exception {
+        return repo.loadProductName(id).orElseThrow(() -> new Exception("Product not found"));
+    }
+
+    public void updateProduct(int id, String name, MultipartFile image) throws Exception {
+        if (name != null) name = name.trim();
+        if (StringUtils.isNullOrBlank(name)) throw new Exception("Name cannot be blank");
+
+        var result = repo.updateProduct(id, name);
+        if (result == UpdateProductResult.NOT_FOUND) throw new Exception("Product not found");
+        if (result == UpdateProductResult.NAME_EXISTED) throw new Exception("Name already exists");
+
+        if (image != null && !image.isEmpty()) {
+            if (!"image/jpeg".equals(image.getContentType())) throw new Exception("Must be JPG");
+            if (image.getSize() > 1024 * 1024) throw new Exception("Too large (>1MB)");
+            storage.saveFile(image, "products/" + id + ".jpg");
+        }
+    }
+    public void deleteProduct(int id) {
+        repo.deleteProduct(id);
+        storage.deleteFile("products/" + id + ".jpg");
+    }
+
 }

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Product</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/w3.css}">
+    <link rel="stylesheet" th:href="@{/showroom.css}">
+</head>
+<body>
+
+<div th:replace="~{header :: header}"></div>
+
+<div class="w3-content w3-padding" style="max-width:1564px">
+
+    <div class="w3-container w3-padding-32">
+        <h3 class="w3-border-bottom w3-border-light-grey w3-padding-16">Edit Product</h3>
+
+        <p th:if="${errorMsg}" class="w3-text-red" th:text="${errorMsg}"></p>
+
+        <form action="/edit-product" method="post" enctype="multipart/form-data">
+
+            <div class="w3-section">
+                <label>Product ID (Cannot be changed)</label>
+                <input class="w3-input w3-border w3-light-grey" type="text"
+                       name="id" th:value="${productId}" readonly>
+            </div>
+
+            <div class="w3-section">
+                <label>Product Name</label>
+                <input class="w3-input w3-border" type="text" placeholder="Name"
+                       name="productName" th:value="${productName}" required>
+            </div>
+
+            <div class="w3-section">
+                <label>Product Image (Leave empty to keep current image)</label>
+                <input class="w3-input w3-border" type="file" name="productImage" accept=".jpg">
+            </div>
+
+            <button class="w3-button w3-black w3-section" type="submit">
+                SAVE CHANGES
+            </button>
+
+            <a href="/#products" class="w3-button w3-red w3-section">CANCEL</a>
+        </form>
+    </div>
+
+</div>
+
+<div th:replace="~{footer :: footer}"></div>
+
+</body>
+</html>

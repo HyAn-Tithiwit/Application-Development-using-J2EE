@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 @Component
 public class MyStorage implements Storage {
@@ -23,5 +24,10 @@ public class MyStorage implements Storage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    @Override
+    public void deleteFile(String path) {
+        var target = Path.of(uploadsFolder).resolve(path);
+        try { Files.deleteIfExists(target); } catch (IOException e) { throw new RuntimeException(e); }
     }
 }

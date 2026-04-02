@@ -1,24 +1,29 @@
-<div class="w3-container w3-padding-32" id="products" xmlns:th="http://www.w3.org/1999/xhtml">
+<div class="w3-container w3-padding-32" id="products" xmlns:th="http://www.thymeleaf.org">
     <h3 class="w3-border-bottom w3-border-light-grey w3-padding-16">Products</h3>
 </div>
 
-<div xmlns:th="http://www.w3.org/1999/xhtml" th:each="i : ${#numbers.sequence(0, products.size() > 0 ? products.size() - 1 : 0, 4)}"
+<div xmlns:th="http://www.thymeleaf.org"
+     th:each="i : ${#numbers.sequence(0, products.size() > 0 ? products.size() - 1 : 0, 4)}"
      th:if="${products.size() > 0}" class="w3-row-padding">
+
     <div th:each="j : ${#numbers.sequence(i, i + 3)}"
          th:if="${j < products.size()}"
          th:with="p = ${products[j]}"
          class="w3-col l3 m6 w3-margin-bottom">
+
         <div class="w3-display-container">
             <div th:text="${p.name}" class="w3-display-topleft w3-black w3-padding"></div>
             <img th:src="@{|/files/products/${p.id}.jpg|}" th:alt="${p.name}" style="width:100%">
+
             <div th:if="${isUserLoggedIn}" class="w3-display-bottomright w3-row" style="width:100%">
-                <a class="w3-half w3-button w3-blue">Edit</a>
-                <a class="w3-half w3-button w3-red">Delete</a>
+                <a class="w3-half w3-button w3-blue" th:href="@{/edit-product(id=${p.id})}">Edit</a>
+                <a class="w3-half w3-button w3-red" th:href="@{/delete-product(id=${p.id})}"
+                   onclick="return confirm('Are you sure to delete this product?')">Delete</a>
             </div>
         </div>
     </div>
 </div>
 
-<div th:if="${isUserLoggedIn}" class="w3-padding">
+<div th:if="${isUserLoggedIn}" class="w3-padding" xmlns:th="http://www.thymeleaf.org">
     <a class="w3-button w3-green" title="Add product" th:href="@{/add-product}">+ Add product</a>
 </div>

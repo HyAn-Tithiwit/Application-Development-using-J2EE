@@ -5,10 +5,12 @@ import com.tranthyanh.showroom.services.Product;
 import com.tranthyanh.showroom.services.Repo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import com.tranthyanh.showroom.services.UpdateProductResult;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class MySqlRepo implements Repo {
@@ -170,5 +172,38 @@ public class MySqlRepo implements Repo {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public Optional<String> loadProductName(int id) {
+        var sql = "SELECT name FROM products WHERE id = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(rs.getString("name"));
+                return Optional.empty();
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
 
+    @Override
+    public UpdateProductResult updateProduct(int id, String name) {
+        var sql = "UPDATE products SET name = ? WHERE id = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setInt(2, id);
+            if (ps.executeUpdate() == 0) return UpdateProductResult.NOT_FOUND;
+            return UpdateProductResult.OK;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            return UpdateProductResult.NAME_EXISTED;
+        } catch (SQLException e) { throw new RuntimeException(e); }
+
+    }
+
+    @Override
+    public void deleteProduct(int id) {
+        var sql = "DELETE FROM products WHERE id = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
 }

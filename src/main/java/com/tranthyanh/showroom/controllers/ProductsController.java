@@ -52,4 +52,38 @@ public class ProductsController {
             return "add-product";
         }
     }
+    @GetMapping("/edit-product")
+    public String editProductGet(@RequestParam int id, HttpServletRequest request, Model model) {
+        if (!auth.isUserLoggedIn(request)) return "redirect:/login";
+        try {
+            model.addAttribute("isUserLoggedIn", true)
+                    .addAttribute("companyName", settingsService.getCompanyName())
+                    .addAttribute("productId", id)
+                    .addAttribute("productName", productsService.getProductName(id));
+            return "edit-product";
+        } catch (Exception e) { return "redirect:/#products"; }
+    }
+
+    @PostMapping("/edit-product")
+    public String editProductPost(@RequestParam int id, @RequestParam String productName,
+                                  @RequestParam MultipartFile productImage, HttpServletRequest request, Model model) {
+        if (!auth.isUserLoggedIn(request)) return "redirect:/login";
+        try {
+            productsService.updateProduct(id, productName, productImage);
+            return "redirect:/#products";
+        } catch (Exception e) {
+            model.addAttribute("isUserLoggedIn", true)
+                    .addAttribute("companyName", settingsService.getCompanyName())
+                    .addAttribute("productId", id)
+                    .addAttribute("productName", productName)
+                    .addAttribute("errorMsg", e.getMessage());
+            return "edit-product";
+        }
+    }
+    @GetMapping("/delete-product")
+    public String deleteProduct(@RequestParam int id, HttpServletRequest request) {
+        if (!auth.isUserLoggedIn(request)) return "redirect:/login";
+        productsService.deleteProduct(id);
+        return "redirect:/#products";
+    }
 }
