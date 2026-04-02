@@ -1,13 +1,14 @@
 package com.tranthyanh.showroom.repositories;
 
 import com.tranthyanh.showroom.services.CompanyName;
+import com.tranthyanh.showroom.services.Product;
 import com.tranthyanh.showroom.services.Repo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class MySqlRepo implements Repo {
@@ -118,4 +119,56 @@ public class MySqlRepo implements Repo {
             if (ps.executeUpdate() == 0) throw new RuntimeException("Update failed");
         } catch (SQLException e) { throw new RuntimeException(e); }
     }
+    @Override
+    public List<Product> loadProducts() {
+        // DIY - Task 2: Added "ORDER BY name ASC" to the query
+        var sql = "SELECT id, name FROM products ORDER BY name ASC";
+        try (
+                var conn = getConnection();
+                var stmt = conn.prepareStatement(sql);
+                var rs = stmt.executeQuery()
+        ) {
+            var products = new ArrayList<Product>();
+            while (rs.next()) {
+                var product = new Product(rs.getInt("id"), rs.getString("name"));
+                products.add(product);
+            }
+            return products;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // DIY - Task 3: Implementation to check for duplicate names
+    @Override
+    public boolean isProductNameExists(String name) {
+        var sql = "SELECT id FROM products WHERE name = ?";
+        try (var conn = getConnection(); var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (var rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int insertProduct(String name) {
+        var sql = "INSERT INTO products (name) VALUES (?)";
+        try (
+                var conn = getConnection();
+                var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            ps.setString(1, name);
+            ps.executeUpdate();
+            try (var keys = ps.getGeneratedKeys()) {
+                keys.next();
+                return keys.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
